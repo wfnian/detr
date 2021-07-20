@@ -14,23 +14,26 @@ class PositionEmbeddingSine(nn.Module):
     This is a more standard version of the position embedding, very similar to the one
     used by the Attention is all you need paper, generalized to work on images.
     """
+
     def __init__(self, num_pos_feats=64, temperature=10000, normalize=False, scale=None):
         super().__init__()
-        self.num_pos_feats = num_pos_feats
-        self.temperature = temperature
+        self.num_pos_feats = num_pos_feats  # = embedding 嵌入维度：hidden_dim/2
+        self.temperature = temperature  # = dim_val?
         self.normalize = normalize
+        print("num_pos_feats={}".format(num_pos_feats))
         if scale is not None and normalize is False:
             raise ValueError("normalize should be True if scale is passed")
         if scale is None:
             scale = 2 * math.pi
-        self.scale = scale
+        self.scale = scale  # = 2pi
 
     def forward(self, tensor_list: NestedTensor):
         x = tensor_list.tensors
+        print("positional encoding x.shape".format(x.shape))
         mask = tensor_list.mask
         assert mask is not None
         not_mask = ~mask
-        y_embed = not_mask.cumsum(1, dtype=torch.float32)
+        y_embed = not_mask.cumsum(1, dtype=torch.float32)  # = 按照dim累加
         x_embed = not_mask.cumsum(2, dtype=torch.float32)
         if self.normalize:
             eps = 1e-6
@@ -52,6 +55,7 @@ class PositionEmbeddingLearned(nn.Module):
     """
     Absolute pos embedding, learned.
     """
+
     def __init__(self, num_pos_feats=256):
         super().__init__()
         self.row_embed = nn.Embedding(50, num_pos_feats)

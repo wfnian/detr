@@ -46,6 +46,9 @@ def convert_coco_poly_to_mask(segmentations, height, width):
         masks = torch.zeros((0, height, width), dtype=torch.uint8)
     return masks
 
+# ~ ConvertCocoPolysToMask将每个image对应的target转化成为一个dict，
+# ~ 这个dict中保存了该图片的所有标注信息，其中对于目标检测的有用信息是boxes和labels
+
 
 class ConvertCocoPolysToMask(object):
     def __init__(self, return_masks=False):
@@ -120,7 +123,7 @@ def make_coco_transforms(image_set):
     ])
 
     scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
-
+    #~ RandomHorizontalFlip实现对image和target的水平翻转
     if image_set == 'train':
         return T.Compose([
             T.RandomHorizontalFlip(),
@@ -145,7 +148,7 @@ def make_coco_transforms(image_set):
 
 
 def build(image_set, args):
-    root = Path(args.coco_path)
+    root = Path(args.coco_path)  # = datasets/to/coco
     assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
     PATHS = {
@@ -154,5 +157,8 @@ def build(image_set, args):
     }
 
     img_folder, ann_file = PATHS[image_set]
-    dataset = CocoDetection(img_folder, ann_file, transforms=make_coco_transforms(image_set), return_masks=args.masks)
+    # = datasets/path/to/coco/train2017
+    # = datasets/path/to/coco/annotations/instances_train2017.json
+    dataset = CocoDetection(img_folder, ann_file, transforms=make_coco_transforms(
+        image_set), return_masks=args.masks)
     return dataset

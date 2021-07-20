@@ -275,7 +275,7 @@ def _get_clones(module, N):
 
 def build_transformer(args):
     return Transformer(
-        d_model=args.hidden_dim,
+        d_model=args.hidden_dim,  # = d_model embed_dim
         dropout=args.dropout,
         nhead=args.nheads,
         dim_feedforward=args.dim_feedforward,

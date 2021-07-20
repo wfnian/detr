@@ -1,5 +1,4 @@
 .nfs*
-*.ipynb
 *.pyc
 .dumbo.json
 .DS_Store
@@ -15,3 +14,5 @@ experiment-*
 .mypy_cache/*
 not_tracked_dir/
 .vscode
+datasets/path/to/coco/*
+

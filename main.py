@@ -14,7 +14,7 @@ import datasets
 import util.misc as utils
 from datasets import build_dataset, get_coco_api_from_dataset
 from engine import evaluate, train_one_epoch
-from models import build_model
+from models import build
 
 
 def get_args_parser():
@@ -53,7 +53,7 @@ def get_args_parser():
     parser.add_argument('--nheads', default=8, type=int,
                         help="Number of attention heads inside the transformer's attentions")
     parser.add_argument('--num_queries', default=100, type=int,
-                        help="Number of query slots")
+                        help="Number of query slots")  # = 此参数我不懂
     parser.add_argument('--pre_norm', action='store_true')
 
     # * Segmentation
@@ -109,7 +109,6 @@ def main(args):
     if args.frozen_weights is not None:
         assert args.masks, "Frozen training is meant for segmentation only"
     print(args)
-
     device = torch.device(args.device)
 
     # fix the seed for reproducibility
@@ -118,15 +117,13 @@ def main(args):
     np.random.seed(seed)
     random.seed(seed)
 
-    model, criterion, postprocessors = build_model(args)
+    model, criterion, postprocessors = build(args)  # = model bulid
     model.to(device)
 
     model_without_ddp = model
-    if args.distributed:
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
-        model_without_ddp = model.module
+
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print('number of params:', n_parameters)
+    print('number of params:', n_parameters)  # = 统计参数个数
 
     param_dicts = [
         {"params": [p for n, p in model_without_ddp.named_parameters() if "backbone" not in n and p.requires_grad]},
@@ -140,6 +137,8 @@ def main(args):
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, args.lr_drop)
 
     dataset_train = build_dataset(image_set='train', args=args)
+    # ~ train 118287张图片
+
     dataset_val = build_dataset(image_set='val', args=args)
 
     if args.distributed:
